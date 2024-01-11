@@ -6,7 +6,7 @@ const appTester = zapier.createAppTester(App);
 // read the `.env` file into the environment, if available
 zapier.tools.env.inject();
 
-describe('resources.task', () => {
+describe('searches.post_GetTasksRequest', () => {
   it('should run', async () => {
     const bundle = {
       inputData: {
@@ -18,7 +18,7 @@ describe('resources.task', () => {
       }
     };
 
-    const results = await appTester(App.resources.task.search.operation.perform, bundle);
+    const results = await appTester(App.searches.post_GetTasksRequest.operation.perform, bundle);
     expect(results).toBeDefined();
     // TODO: add more assertions
   });

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Swagger = require('./Swagger');
+const Swagger = require('./WooDelivery/Swagger');
 
 class ResourceGenerator {
   constructor() {
@@ -42,7 +42,7 @@ class ResourceGenerator {
       key: component.replace(/Model$/, '').toLowerCase(),
       noun: this._generateNoun(component),
       sample: this._generateSample(schema.properties),
-      outputFields: this._generateOutputFields(schema)
+      outputFields: this._generateOutputFields(component)
       // get/list/search/create
     };
 
@@ -73,9 +73,9 @@ class ResourceGenerator {
             return;
           }
 
-          let ref = responseSpecSchema.$ref || responseSpecSchema.items?.$ref;
+          let responseRef = responseSpecSchema.$ref || responseSpecSchema.items?.$ref;
 
-          if (!ref || !ref === `#/components/schemas/${component}`) {
+          if (!responseRef || responseRef !== `#/components/schemas/${component}`) {
             return;
           }
 
@@ -88,26 +88,40 @@ class ResourceGenerator {
 
           // get Model name from ref
           const requestModelName = requestRef.split('/').pop();
-          const inputFields = this._generateInputFields(requestModelName);
 
-          const action = {
-            display: {
-              label: `${method.toUpperCase()} ${requestModelName}`,
-              description: `${method} a ${requestModelName}`
-            },
-            operation: {
-              inputFields: inputFields,
-              perform: this._generatePerform(path, method)
-            }
-          };
-
-          actions[`${method}_${requestModelName}`] = action;
+          actions[`${method}_${requestModelName}`] = this._generateAction(
+            component,
+            path,
+            method,
+            requestModelName
+          );
         });
       });
     });
 
     return actions;
   }
+
+  _generateAction(component, path, method, requestModelName) {
+    const inputFields = this._generateInputFields(requestModelName);
+
+    const action = {
+      key: `${method}_${requestModelName}`,
+      noun: this._generateNoun(component),
+      display: {
+        label: this._generateActionNoun(requestModelName),
+        description: this._generateActionNoun(requestModelName)
+      },
+      operation: {
+        inputFields: inputFields,
+        outputFields: this._generateOutputFields(component),
+        perform: this._generatePerform(path, method)
+      }
+    };
+
+    return action;
+  }
+
 
   _generateInputFields(modelName) {
     // find ref in components.schemas
@@ -117,13 +131,17 @@ class ResourceGenerator {
       throw new Error(`Could not find schema for ${modelName}`);
     }
 
-    const fields = this._generateFields(schema.properties);
+    const fields = this._generateFields(schema.properties, schema.required);
 
     return fields;
   }
 
-  _generateOutputFields(schema) {
-    const fields = this._generateFields(schema.properties, schema.required);
+  // _generateOutputFields(schema) {
+  _generateOutputFields(modelName) {
+    const properties = Swagger.components.schemas[modelName].properties;
+    const required = Swagger.components.schemas[modelName].required;
+    const fields = this._generateFields(properties, required);
+    // const fields = this._generateFields(schema.properties, schema.required);
     return fields;
   }
 
@@ -188,12 +206,31 @@ class ResourceGenerator {
     return component.replace(/Model$/, '');
   }
 
+  _generateActionNoun(modelName) {
+    return modelName.replace(/Request$/, '').replace(/(?<!^)([A-Z])(?![A-Z])/g, ' $1');
+  }
+
   _generatePerform(path, method) {
-    return {
-      url: `${process.env.BASE_URL}${path}`,
-      method: method.toUpperCase(),
-      // removeMissingValuesFrom: { params: true }
-    }
+    const ucMethod = method.toUpperCase();
+
+    return async (z, bundle) => {
+      const url = `${process.env.BASE_URL}${path}`;
+      const params = ucMethod === 'GET' ? bundle.inputData : {};
+      const body = ucMethod === 'POST' ? bundle.inputData : {};
+      const headers = ucMethod === 'POST' ? {
+        'Content-Type': 'application/json'
+      } : {};
+
+      const response = await z.request({
+        url: url,
+        method: ucMethod,
+        params: params,
+        body: body,
+        headers: headers
+      });
+
+      return response.json.data;
+    };
   }
 
   forEachKey(obj, callback) {

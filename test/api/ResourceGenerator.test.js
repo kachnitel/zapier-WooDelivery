@@ -1,5 +1,5 @@
 const ResourceGenerator = require('../../api/ResourceGenerator');
-const swagger = require('../../api/Swagger');
+const swagger = require('../../api/WooDelivery/Swagger');
 
 describe('ResourceGenerator', () => {
   let resourceGenerator;
@@ -12,7 +12,6 @@ describe('ResourceGenerator', () => {
     it('should return the resource with the specified name', () => {
       // Arrange
       const resourceName = 'task';
-      // const expectedResource = { key: resourceName };
 
       // Act
       const result = resourceGenerator.getResource(resourceName);
@@ -58,12 +57,15 @@ describe('ResourceGenerator', () => {
     it('should return the actions', () => {
       // Act
       const result = resourceGenerator.generateActions(
-        swagger.components.schemas.TaskModel
+        'TaskModel'
       );
 
       // Assert
       expect(result).toBeDefined();
       expect(result['post_GetTasksRequest']).toBeDefined();
+      expect(result['post_GetTasksRequest'].display.label).toEqual('Get Tasks');
+      expect(result['post_GetTasksRequest'].operation.perform).toBeDefined();
+      expect(result['post_NewTaskRequest']).toBeDefined();
     });
   });
 
@@ -77,6 +79,8 @@ describe('ResourceGenerator', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result).toHaveLength(37);
+      expect(result[0].key).toEqual('taskTypeId');
+      expect(result[0].required).toEqual(true);
     });
   });
 
@@ -84,7 +88,7 @@ describe('ResourceGenerator', () => {
     it('should return the output fields', () => {
       // Act
       const result = resourceGenerator._generateOutputFields(
-        swagger.components.schemas.TaskModel
+        'TaskModel'
       );
 
       // Assert
@@ -190,6 +194,16 @@ describe('ResourceGenerator', () => {
 
       // Assert
       expect(result).toEqual('Task');
+    });
+  });
+
+  describe('_generateActionNoun', () => {
+    it('should turn GetTasksRequest into Get Tasks', () => {
+      // Act
+      const result = resourceGenerator._generateActionNoun('GetTasksRequest');
+
+      // Assert
+      expect(result).toEqual('Get Tasks');
     });
   });
 });

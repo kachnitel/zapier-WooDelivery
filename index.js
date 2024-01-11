@@ -5,8 +5,11 @@ const {
   befores,
   afters
 } = require('./authentication');
-// const recipeCreates = require('./creates/recipe.js~');
-const taskResource = require("./resources/task");
+const ResourceGenerator = require('./api/ResourceGenerator');
+const actions = require('./api/WooDelivery/actions');
+
+const generator = new ResourceGenerator();
+const taskActions = generator.generateActions('TaskModel');
 
 module.exports = {
   // This is just shorthand to reference the installed dependencies you have.
@@ -24,14 +27,19 @@ module.exports = {
   // triggers: {},
 
   // If you want your searches to show up, you better include it here!
-  // searches: {},
-
-  // If you want your creates to show up, you better include it here!
-  // creates: {
-    // ...recipeCreates
+  // searches: {
+  //   searchtask: taskActions['post_GetTasksRequest']
   // },
 
+  // // If you want your creates to show up, you better include it here!
+  // creates: {
+  //   newtask: taskActions['post_NewTaskRequest'],
+  //   updatetask: taskActions['post_UpdateTaskRequest']
+  // },
+  ...actions,
+
   resources: {
-    [taskResource.key]: taskResource
+    // [taskResource.key]: generator.generateResource('TaskModel')
+    'task': generator.getResource('task')
   },
 };
