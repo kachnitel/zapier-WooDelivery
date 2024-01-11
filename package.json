@@ -1,0 +1,16 @@
+{
+  "name": "dwoodelivery",
+  "version": "1.0.0",
+  "description": "WooDelivery API supporting driver team id setting",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --testTimeout 10000"
+  },
+  "dependencies": {
+    "zapier-platform-core": "15.5.1"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0"
+  },
+  "private": true
+}
