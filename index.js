@@ -1,15 +1,9 @@
 const {
   config: authentication,
-  // authBefores: befores,
-  // authAfters: afters
-  befores,
-  afters
+  befores: authBefores,
+  afters: authAfters
 } = require('./authentication');
-const ResourceGenerator = require('./api/ResourceGenerator');
-const actions = require('./api/WooDelivery/actions');
-
-const generator = new ResourceGenerator();
-const taskActions = generator.generateActions('TaskModel');
+const config = require('./api/WooDelivery/config');
 
 module.exports = {
   // This is just shorthand to reference the installed dependencies you have.
@@ -18,28 +12,8 @@ module.exports = {
   platformVersion: require('zapier-platform-core').version,
 
   authentication: authentication,
+  beforeRequest: [...authBefores],
+  afterResponse: [...authAfters],
 
-  beforeRequest: [...befores],
-
-  afterResponse: [...afters],
-
-  // If you want your trigger to show up, you better include it here!
-  // triggers: {},
-
-  // If you want your searches to show up, you better include it here!
-  // searches: {
-  //   searchtask: taskActions['post_GetTasksRequest']
-  // },
-
-  // // If you want your creates to show up, you better include it here!
-  // creates: {
-  //   newtask: taskActions['post_NewTaskRequest'],
-  //   updatetask: taskActions['post_UpdateTaskRequest']
-  // },
-  ...actions,
-
-  resources: {
-    // [taskResource.key]: generator.generateResource('TaskModel')
-    'task': generator.getResource('task')
-  },
+  ...config
 };

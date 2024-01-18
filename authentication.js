@@ -2,6 +2,8 @@
 
 require('dotenv').config();
 
+// TODO: use Generator % schema to generate this
+
 // You want to make a request to an endpoint that is either specifically designed
 // to test auth, or one that every user will have access to. eg: `/me`.
 // By returning the entire request object, you have access to the request and
