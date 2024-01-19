@@ -43,7 +43,6 @@ class ResourceGenerator {
       noun: this._generateNoun(component),
       sample: this._generateSample(schema.properties),
       outputFields: this._generateOutputFields(component)
-      // get/list/search/create
     };
 
     return resource;
