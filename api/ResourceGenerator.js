@@ -79,7 +79,15 @@ class ResourceGenerator {
           }
 
           // find matching request data
-          let requestRef = requestData?.content['application/json']?.schema?.$ref;
+          let requestRefSchema = requestData?.content?.['application/json']?.schema;
+
+          if (!requestRefSchema) {
+            // TODO: no request data, but response is a model, so it is a list action;
+            // update _generateAction to handle this (no inputFields)
+            return;
+          }
+
+          let requestRef = requestRefSchema.$ref || requestRefSchema.items?.$ref;
 
           if (!requestRef) {
             return;
