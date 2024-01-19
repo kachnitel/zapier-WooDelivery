@@ -17,7 +17,7 @@ function getModelsConfig(models) {
   };
 
   models.forEach(model => {
-    config.resources[model.name] = model.resource;
+    config.resources[model.resource.key] = model.resource;
     config.searches = { ...config.searches, ...model.searches };
     config.creates = { ...config.creates, ...model.creates };
     config.searchOrCreates = { ...config.searchOrCreates, ...model.searchOrCreates };

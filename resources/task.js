@@ -1,9 +1,7 @@
 module.exports = class TaskResource {
-  name = 'task';
-
   constructor(generator) {
     this.generator = generator;
-    this.actions = generator.generateActions('TaskModel');
+    this.actions = generator.generateActions('TaskModel', 'task');
   }
 
   get resource() {

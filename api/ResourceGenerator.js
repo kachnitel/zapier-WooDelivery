@@ -51,9 +51,9 @@ class ResourceGenerator {
   /**
    * Generate the actions for a component
    * Look into Swagger.paths[][].responses.2??.content.*.schema.$ref
-   * If it is a reference to a schema, then it is an action (format "#/components/schemas/TaskModel")
+   * If it is a reference to a schema, then it is an action (format "#/components/schemas/{component}")
    */
-  generateActions(component) {
+  generateActions(component, resourceKey) {
     const actions = {};
 
     this.forEachKey(Swagger.paths, (path, methods) => {
@@ -100,7 +100,8 @@ class ResourceGenerator {
             component,
             path,
             method,
-            requestModelName
+            requestModelName,
+            resourceKey
           );
         });
       });
@@ -109,9 +110,7 @@ class ResourceGenerator {
     return actions;
   }
 
-  _generateAction(component, path, method, requestModelName) {
-    const inputFields = this._generateInputFields(requestModelName);
-
+  _generateAction(component, path, method, requestModelName, resourceKey) {
     const action = {
       key: `${method}_${requestModelName}`,
       noun: this._generateNoun(component),
@@ -120,8 +119,9 @@ class ResourceGenerator {
         description: this._generateActionNoun(requestModelName)
       },
       operation: {
-        inputFields: inputFields,
-        outputFields: this._generateOutputFields(component),
+        resource: resourceKey,
+        inputFields: this._generateInputFields(requestModelName),
+        // outputFields: this._generateOutputFields(component),
         perform: this._generatePerform(path, method)
       }
     };
@@ -161,7 +161,7 @@ class ResourceGenerator {
     this.forEachKey(properties, (key, property) => {
       const field = {
         key: key,
-        label: key,
+        label: this._generateFieldLabel(key),
         type: this._generateFieldType(property),
         required: required.includes(key),
         helpText: property.description
@@ -184,6 +184,10 @@ class ResourceGenerator {
     }
 
     return property.type;
+  }
+
+  _generateFieldLabel(key) {
+    return key.charAt(0).toUpperCase() + key.slice(1).replace(/(?<!^)([A-Z])(?![A-Z])/g, ' $1');
   }
 
   _generateSample(properties) {
