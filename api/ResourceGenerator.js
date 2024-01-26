@@ -49,7 +49,9 @@ class ResourceGenerator {
   }
 
   /**
-   * Generate the actions for a component
+   * Generate the actions for a component.
+   *
+   * Finds all paths that send or receive the component as a request or response
    * Look into Swagger.paths[][].responses.2??.content.*.schema.$ref
    * If it is a reference to a schema, then it is an action (format "#/components/schemas/{component}")
    */
@@ -58,6 +60,7 @@ class ResourceGenerator {
 
     this.forEachKey(Swagger.paths, (path, methods) => {
       this.forEachKey(methods, (method, methodSpec) => {
+        const description = methodSpec.summary;
         const responses = methodSpec.responses;
         const requestData = methodSpec.requestBody;
 
@@ -101,7 +104,8 @@ class ResourceGenerator {
             path,
             method,
             requestModelName,
-            resourceKey
+            resourceKey,
+            description
           );
         });
       });
@@ -110,13 +114,13 @@ class ResourceGenerator {
     return actions;
   }
 
-  _generateAction(component, path, method, requestModelName, resourceKey) {
+  _generateAction(component, path, method, requestModelName, resourceKey, description) {
     const action = {
       key: `${method}_${requestModelName}`,
       noun: this._generateNoun(component),
       display: {
         label: this._generateActionNoun(requestModelName),
-        description: this._generateActionNoun(requestModelName)
+        description: description
       },
       operation: {
         resource: resourceKey,

@@ -15,9 +15,26 @@ module.exports = class TaskResource {
   }
 
   get creates() {
+    // WooDelivery swagger spec calls /deletetask a DeleteTaskStatusRequest POST
+    // Also real return body is {"code": "200","msg": "Success"}
+    // So we need to override the operation.perform to not look for response.json.data
+    const deleteAction = this.actions['post_DeleteTaskStatusRequest'];
+    deleteAction.display.label = 'Delete Task';
+    deleteAction.operation.perform = async (z, bundle) => {
+      const response = await z.request({
+        url: `${process.env.BASE_URL}/api/form/deletetask`,
+        method: 'POST',
+        body: bundle.inputData,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      return response.json;
+    }
+
     return {
       post_NewTaskRequest: this.actions['post_NewTaskRequest'],
-      post_UpdateTaskRequest: this.actions['post_UpdateTaskRequest']
+      post_UpdateTaskRequest: this.actions['post_UpdateTaskRequest'],
+      post_DeleteTaskStatusRequest: deleteAction
     };
   }
 

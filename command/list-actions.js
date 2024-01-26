@@ -39,6 +39,9 @@ function renderHeader() {
 function showDetails(actionIndex) {
   let action = actions[actionIndex];
 
+  process.stdout.write(chalk.bold.green(action.display.label) + '\n');
+  process.stdout.write(chalk.dim(action.display.description) + '\n');
+
   process.stdout.write(chalk.bold.green(action.noun) + ' ' + chalk.yellow(action.key) + '\n');
   process.stdout.write(chalk.yellow('Input fields:\n'));
   process.stdout.write(renderHeader());
